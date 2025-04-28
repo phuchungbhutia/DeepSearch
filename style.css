@@ -1,25 +1,26 @@
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
     background-color: #f8f9fa;
-    color: #202124;
 }
 
-.sidebar {
-    height: 100vh;
-    border-right: 1px solid #dee2e6;
-}
-
-.nav-link {
-    color: #202124;
-}
-
-.nav-link:hover, .nav-link.active {
-    background-color: #e9ecef;
+h2 {
     color: #4285F4;
 }
 
-.card {
-    border-radius: 8px;
+.nav-link {
+    color: #333;
+}
+
+.nav-link:hover {
+    color: #4285F4;
+    background-color: #e9ecef;
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: #4285F4;
+    box-shadow: 0 0 0 0.25rem rgba(66, 133, 244, 0.25);
 }
 
 .btn-primary {
@@ -28,17 +29,8 @@ body {
 }
 
 .btn-primary:hover {
-    background-color: #34a853;
-    border-color: #34a853;
-}
-
-.result-item {
-    padding: 15px;
-    border-bottom: 1px solid #dee2e6;
-}
-
-.result-item:last-child {
-    border-bottom: none;
+    background-color: #357ae8;
+    border-color: #357ae8;
 }
 
 .dark-mode {
@@ -46,28 +38,38 @@ body {
     color: #f8f9fa;
 }
 
-.dark-mode .sidebar {
-    background-color: #303134;
-    border-right-color: #444;
+.dark-mode h2 {
+    color: #34a853;
 }
 
 .dark-mode .nav-link {
     color: #f8f9fa;
 }
 
-.dark-mode .card {
-    background-color: #303134;
-    border-color: #444;
+.dark-mode .nav-link:hover {
+    color: #34a853;
+    background-color: #3c4043;
 }
 
-.dark-mode .result-item {
-    border-bottom-color: #444;
+.dark-mode .form-control,
+.dark-mode .form-select {
+    background-color: #3c4043;
+    color: #f8f9fa;
+    border-color: #5e6366;
 }
 
-@media (max-width: 767px) {
-    .sidebar {
-        height: auto;
-        border-right: none;
-        border-bottom: 1px solid #dee2e6;
-    }
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
+    border-color: #34a853;
+    box-shadow: 0 0 0 0.25rem rgba(52, 168, 83, 0.25);
+}
+
+.dark-mode .btn-primary {
+    background-color: #34a853;
+    border-color: #34a853;
+}
+
+.dark-mode .btn-primary:hover {
+    background-color: #2b8a3e;
+    border-color: #2b8a3e;
 }
