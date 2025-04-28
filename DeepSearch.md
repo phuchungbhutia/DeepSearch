@@ -1,3 +1,10 @@
+## **🚨 Warning: Legal & Ethical Use**
+- Only search for **publicly available** files.
+- Avoid accessing **private data** without permission.
+- Use for **research, cybersecurity, or recovery purposes only**.
+
+---
+
 ### **🔍 Search Like a Pro**
 1. **Exact Phrase Search**  
    - Use `"quotes"` to find exact matches.  
@@ -318,13 +325,6 @@ intitle:"webcam 7" "live view"
   ```
   filetype:log "password" OR "passwd"
   ```
-
----
-
-## **🚨 Warning: Legal & Ethical Use**
-- Only search for **publicly available** files.
-- Avoid accessing **private data** without permission.
-- Use for **research, cybersecurity, or recovery purposes only**.
 
 ---
 # **Ultimate Deep File Search Tool - Complete GitHub Project**
