@@ -1,56 +1,73 @@
-:root {
-    --primary-color: #4285F4;
-    --secondary-color: #34a853;
-    --dark-color: #202124;
-}
-
 body {
+    font-family: 'Segoe UI', sans-serif;
     background-color: #f8f9fa;
-    color: var(--dark-color);
+    color: #202124;
 }
 
-.navbar {
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    background-color: var(--dark-color) !important;
+.sidebar {
+    height: 100vh;
+    border-right: 1px solid #dee2e6;
+}
+
+.nav-link {
+    color: #202124;
+}
+
+.nav-link:hover, .nav-link.active {
+    background-color: #e9ecef;
+    color: #4285F4;
 }
 
 .card {
-    border: none;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
+    border-radius: 8px;
 }
 
-.card:hover {
-    transform: translateY(-2px);
+.btn-primary {
+    background-color: #4285F4;
+    border-color: #4285F4;
 }
 
-.list-group-item.active {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
+.btn-primary:hover {
+    background-color: #34a853;
+    border-color: #34a853;
 }
 
-#results .list-group-item {
-    transition: all 0.2s;
-    border-left: 3px solid var(--primary-color);
+.result-item {
+    padding: 15px;
+    border-bottom: 1px solid #dee2e6;
 }
 
-#results .list-group-item:hover {
-    background-color: #f1f3f4;
-    border-left-width: 5px;
+.result-item:last-child {
+    border-bottom: none;
 }
 
-.search-type-icon {
-    font-size: 1.1rem;
-    margin-right: 8px;
+.dark-mode {
+    background-color: #202124;
+    color: #f8f9fa;
 }
 
-.badge-source {
-    background-color: var(--secondary-color);
+.dark-mode .sidebar {
+    background-color: #303134;
+    border-right-color: #444;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .card {
-        margin-bottom: 1rem;
+.dark-mode .nav-link {
+    color: #f8f9fa;
+}
+
+.dark-mode .card {
+    background-color: #303134;
+    border-color: #444;
+}
+
+.dark-mode .result-item {
+    border-bottom-color: #444;
+}
+
+@media (max-width: 767px) {
+    .sidebar {
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
     }
 }
