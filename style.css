@@ -1,35 +1,56 @@
+:root {
+    --primary-color: #4285F4;
+    --secondary-color: #34a853;
+    --dark-color: #202124;
+}
+
 body {
     background-color: #f8f9fa;
+    color: var(--dark-color);
 }
 
 .navbar {
     box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    background-color: var(--dark-color) !important;
 }
 
 .card {
     border: none;
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
 }
 
 .list-group-item.active {
-    background-color: #4285F4;
-    border-color: #4285F4;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
 }
 
 #results .list-group-item {
     transition: all 0.2s;
+    border-left: 3px solid var(--primary-color);
 }
 
 #results .list-group-item:hover {
-    background-color: #f8f9fa;
-}
-
-.badge-source {
-    background: #34a853;
+    background-color: #f1f3f4;
+    border-left-width: 5px;
 }
 
 .search-type-icon {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     margin-right: 8px;
-    vertical-align: middle;
+}
+
+.badge-source {
+    background-color: var(--secondary-color);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
 }

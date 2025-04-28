@@ -3,71 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ultimate Deep File Search</title>
+    <title>DeepSearch - Advanced File Search Tool</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <nav class="navbar navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container">
-            <span class="navbar-brand mb-0 h1">
-                <i class="bi bi-search-heart"></i> Deep File Search
-            </span>
-            <div class="d-flex">
-                <button class="btn btn-sm btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#helpModal">
-                    <i class="bi bi-question-circle"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
-                    <i class="bi bi-gear"></i>
-                </button>
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-search-heart me-2"></i>DeepSearch
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light me-2" data-bs-toggle="modal" data-bs-target="#helpModal">
+                            <i class="bi bi-question-circle"></i> Help
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn btn-outline-light" data-bs-toggle="modal" data-bs-target="#settingsModal">
+                            <i class="bi bi-gear"></i> Settings
+                        </button>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container my-5">
+    <div class="container my-4">
         <div class="row">
-            <div class="col-md-3">
-                <div class="list-group">
-                    <button class="list-group-item list-group-item-action active" data-search-type="google">
-                        <i class="bi bi-google"></i> Google Drive
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-search-type="ftp">
-                        <i class="bi bi-hdd-network"></i> FTP Servers
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-search-type="dir">
-                        <i class="bi bi-folder-symlink"></i> Web Directories
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-search-type="github">
-                        <i class="bi bi-github"></i> GitHub Secrets
-                    </button>
-                    <button class="list-group-item list-group-item-action" data-search-type="shodan">
-                        <i class="bi bi-router"></i> Shodan IoT
-                    </button>
-                </div>
-                
-                <div class="card mt-3">
-                    <div class="card-header">Recent Searches</div>
-                    <div class="card-body p-2">
-                        <div id="recent-searches" class="list-group list-group-flush"></div>
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-search me-2"></i>Search Types
                     </div>
+                    <div class="list-group list-group-flush">
+                        <button class="list-group-item list-group-item-action active" data-search-type="google">
+                            <i class="bi bi-google me-2"></i>Google Drive
+                        </button>
+                        <button class="list-group-item list-group-item-action" data-search-type="ftp">
+                            <i class="bi bi-hdd-network me-2"></i>FTP Servers
+                        </button>
+                        <button class="list-group-item list-group-item-action" data-search-type="dir">
+                            <i class="bi bi-folder-symlink me-2"></i>Web Directories
+                        </button>
+                        <button class="list-group-item list-group-item-action" data-search-type="github">
+                            <i class="bi bi-github me-2"></i>GitHub Secrets
+                        </button>
+                        <button class="list-group-item list-group-item-action" data-search-type="shodan">
+                            <i class="bi bi-router me-2"></i>Shodan IoT
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card mt-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-clock-history me-2"></i>Recent Searches</span>
+                        <button id="clear-history" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                    <div id="recent-searches" class="list-group list-group-flush"></div>
                 </div>
             </div>
-            
-            <div class="col-md-9">
+
+            <!-- Main Content -->
+            <div class="col-lg-9">
                 <div class="card">
-                    <div class="card-header">
-                        <div class="input-group">
-                            <input type="text" id="keyword" class="form-control" placeholder="Search term...">
-                            <button id="search-btn" class="btn btn-primary">
-                                <i class="bi bi-search"></i> Search
-                            </button>
-                        </div>
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-search me-2"></i>Search Panel
                     </div>
                     <div class="card-body">
-                        <div id="search-options" class="mb-3">
-                            <!-- Dynamic options will appear here -->
+                        <div class="input-group mb-3">
+                            <input type="text" id="keyword" class="form-control" placeholder="Enter search term...">
+                            <button id="search-btn" class="btn btn-success">
+                                <i class="bi bi-search me-1"></i> Search
+                            </button>
                         </div>
+
+                        <div id="search-options" class="mb-3"></div>
+
                         <div id="results">
                             <div class="text-center text-muted py-5">
                                 <i class="bi bi-search display-4"></i>
@@ -82,27 +102,14 @@
 
     <!-- Modals -->
     <div class="modal fade" id="helpModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Help & Legal</h5>
+                    <h5 class="modal-title"><i class="bi bi-question-circle me-2"></i>Help & Legal Information</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <h6>Legal Notice</h6>
-                    <p>This tool should only be used for:</p>
-                    <ul>
-                        <li>Finding publicly available files</li>
-                        <li>Security research (with permission)</li>
-                        <li>Recovering your own lost files</li>
-                    </ul>
-                    <hr>
-                    <h6>Search Types</h6>
-                    <p><strong>Google Drive:</strong> Finds publicly shared documents</p>
-                    <p><strong>FTP Servers:</strong> Scans for open file repositories</p>
-                    <p><strong>Web Directories:</strong> Finds exposed directory listings</p>
-                    <p><strong>GitHub Secrets:</strong> Searches for accidentally committed secrets</p>
-                    <p><strong>Shodan IoT:</strong> Requires API key for device search</p>
+                    <!-- Help content here -->
                 </div>
             </div>
         </div>

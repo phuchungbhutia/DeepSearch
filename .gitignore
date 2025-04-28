@@ -5,10 +5,11 @@ npm-debug.log
 # IDE
 .vscode/
 .idea/
-.vscodium/
 
 # System
 .DS_Store
 Thumbs.db
 
+# Sensitive data
 config.js
+.env

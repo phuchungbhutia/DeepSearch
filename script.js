@@ -1,205 +1,103 @@
-// Configuration
-const config = {
-    googleAPI: '', // Add your API keys here
-    shodanAPI: '',
-    githubToken: ''
-};
+class DeepSearch {
+    constructor() {
+        this.currentSearchType = 'google';
+        this.init();
+    }
 
-// DOM Elements
-const searchTypeButtons = document.querySelectorAll('[data-search-type]');
-let currentSearchType = 'google';
+    init() {
+        this.setupEventListeners();
+        this.loadSearchHistory();
+        this.updateSearchOptions();
+    }
 
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    // Set up search type buttons
-    searchTypeButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            searchTypeButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentSearchType = btn.dataset.searchType;
-            updateSearchOptions();
+    setupEventListeners() {
+        // Search type selection
+        document.querySelectorAll('[data-search-type]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-search-type]').forEach(b => 
+                    b.classList.remove('active'));
+                btn.classList.add('active');
+                this.currentSearchType = btn.dataset.searchType;
+                this.updateSearchOptions();
+            });
         });
-    });
 
-    // Search button handler
-    document.getElementById('search-btn').addEventListener('click', performSearch);
-});
+        // Search button
+        document.getElementById('search-btn').addEventListener('click', () => 
+            this.performSearch());
 
-// Update options based on search type
-function updateSearchOptions() {
-    const optionsDiv = document.getElementById('search-options');
-    let html = '';
-
-    switch(currentSearchType) {
-        case 'google':
-            html = `
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">File Types</label>
-                        <select class="form-select" id="file-type">
-                            <option value="pdf">PDF</option>
-                            <option value="doc,docx">Word</option>
-                            <option value="xls,xlsx">Excel</option>
-                            <option value="ppt,pptx">PowerPoint</option>
-                            <option value="*">All Files</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Domain</label>
-                        <input type="text" id="domain" class="form-control" placeholder="example.com">
-                    </div>
-                </div>
-            `;
-            break;
-            
-        case 'ftp':
-            html = `
-                <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" id="anon-ftp" checked>
-                    <label class="form-check-label" for="anon-ftp">Anonymous FTP Only</label>
-                </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="deep-scan">
-                    <label class="form-check-label" for="deep-scan">Deep Scan (Slower)</label>
-                </div>
-            `;
-            break;
-            
-        case 'github':
-            html = `
-                <div class="alert alert-warning">
-                    <i class="bi bi-exclamation-triangle"></i> GitHub search requires personal access token
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">File Extensions</label>
-                        <input type="text" id="github-ext" class="form-control" value="env,json,yml">
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Organization (optional)</label>
-                        <input type="text" id="github-org" class="form-control" placeholder="google">
-                    </div>
-                </div>
-            `;
-            break;
-            
-        case 'shodan':
-            html = `
-                <div class="alert alert-info">
-                    <i class="bi bi-info-circle"></i> Requires Shodan API key
-                </div>
-                <div class="row">
-                    <div class="col-md-6">
-                        <label class="form-label">Device Type</label>
-                        <select class="form-select" id="shodan-device">
-                            <option value="webcam">Webcams</option>
-                            <option value="printer">Printers</option>
-                            <option value="router">Routers</option>
-                            <option value="database">Databases</option>
-                        </select>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="form-label">Country Code</label>
-                        <input type="text" id="shodan-country" class="form-control" placeholder="US">
-                    </div>
-                </div>
-            `;
-            break;
+        // Clear history
+        document.getElementById('clear-history')?.addEventListener('click', () => 
+            this.clearHistory());
     }
 
-    optionsDiv.innerHTML = html;
-}
+    async performSearch() {
+        const keyword = document.getElementById('keyword').value.trim();
+        if (!keyword) return this.showAlert('Please enter a search term', 'warning');
 
-// Main search function
-async function performSearch() {
-    const keyword = document.getElementById('keyword').value.trim();
-    if (!keyword) return alert('Please enter a search term');
+        this.showLoading();
 
-    showLoading();
-    
-    try {
-        let results;
-        
-        switch(currentSearchType) {
-            case 'google':
-                results = await searchGoogle(keyword);
-                break;
-            case 'ftp':
-                results = await searchFTP(keyword);
-                break;
-            case 'github':
-                results = await searchGitHub(keyword);
-                break;
-            case 'shodan':
-                results = await searchShodan(keyword);
-                break;
-            default:
-                results = await searchDirectory(keyword);
+        try {
+            const results = await this.executeSearch(keyword);
+            this.displayResults(results);
+            this.saveToHistory(keyword, this.currentSearchType);
+        } catch (error) {
+            console.error('Search error:', error);
+            this.showAlert(`Search failed: ${error.message}`, 'danger');
         }
-        
-        displayResults(results);
-        saveToHistory(keyword, currentSearchType);
-    } catch (error) {
-        showError(error);
     }
-}
 
-// Search functions for each type
-async function searchGoogle(query) {
-    const fileType = document.getElementById('file-type')?.value || 'pdf';
-    const domain = document.getElementById('domain')?.value || '';
-    
-    let searchQuery = `site:drive.google.com filetype:${fileType} "${query}"`;
-    if (domain) searchQuery += ` site:${domain}`;
-    
-    // In a real implementation, use Google Custom Search API
-    return {
-        type: 'google',
-        query: searchQuery,
-        demoResults: [
-            {
-                title: `Search for "${query}" on Google Drive`,
+    async executeSearch(keyword) {
+        switch(this.currentSearchType) {
+            case 'google': return this.searchGoogle(keyword);
+            case 'ftp': return this.searchFTP(keyword);
+            case 'dir': return this.searchDirectory(keyword);
+            case 'github': return this.searchGitHub(keyword);
+            case 'shodan': return this.searchShodan(keyword);
+            default: throw new Error('Invalid search type');
+        }
+    }
+
+    async searchGoogle(query) {
+        const fileType = document.getElementById('file-type')?.value || 'pdf';
+        const domain = document.getElementById('domain')?.value || '';
+        
+        let searchQuery = `site:drive.google.com filetype:${fileType} "${query}"`;
+        if (domain) searchQuery += ` site:${domain}`;
+        
+        return {
+            type: 'google',
+            query: searchQuery,
+            results: [{
+                title: `Google Drive results for "${query}"`,
                 url: `https://www.google.com/search?q=${encodeURIComponent(searchQuery)}`,
-                description: `Click to view potential Google Drive files matching your query`
-            }
-        ]
-    };
-}
+                description: `Click to view search results on Google`
+            }]
+        };
+    }
 
-async function searchFTP(query) {
-    const anonOnly = document.getElementById('anon-ftp')?.checked || false;
-    const deepScan = document.getElementById('deep-scan')?.checked || false;
-    
-    // In a real implementation, this would use a backend service
-    return {
-        type: 'ftp',
-        query: `FTP search for "${query}"`,
-        demoResults: [
-            {
-                title: `FTP Server containing "${query}"`,
-                url: `ftp://example.com/pub/${query.replace(/\s+/g, '_')}.zip`,
-                description: `Potential FTP server found (demo result)`
-            }
-        ]
-    };
-}
+    // Other search methods (ftp, directory, github, shodan) would follow similar patterns
 
-// Other search functions would follow similar patterns...
+    displayResults(data) {
+        const resultsDiv = document.getElementById('results');
+        
+        if (!data.results || data.results.length === 0) {
+            resultsDiv.innerHTML = `
+                <div class="alert alert-info">
+                    No results found for your search.
+                </div>
+            `;
+            return;
+        }
 
-function displayResults(data) {
-    const resultsDiv = document.getElementById('results');
-    
-    if (data.demoResults) {
-        // Demo mode - show example results
         let html = `
-            <div class="alert alert-info">
-                <strong>Search Query:</strong> ${data.query}<br>
-                <small>This is a demo. Real implementation would show actual results.</small>
+            <div class="alert alert-primary">
+                <strong>Search Query:</strong> ${data.query}
             </div>
             <div class="list-group">
         `;
         
-        data.demoResults.forEach(result => {
+        data.results.forEach(result => {
             html += `
                 <a href="${result.url}" target="_blank" class="list-group-item list-group-item-action">
                     <div class="d-flex w-100 justify-content-between">
@@ -214,91 +112,119 @@ function displayResults(data) {
         
         html += `</div>`;
         resultsDiv.innerHTML = html;
-    } else {
-        // Real results would be processed here
     }
-}
 
-// Utility functions
-function showLoading() {
-    document.getElementById('results').innerHTML = `
-        <div class="text-center py-5">
-            <div class="spinner-border text-primary"></div>
-            <p class="mt-2">Searching...</p>
-        </div>
-    `;
-}
-
-function showError(error) {
-    document.getElementById('results').innerHTML = `
-        <div class="alert alert-danger">
-            <strong>Error:</strong> ${error.message || error}
-        </div>
-    `;
-}
-
-function saveToHistory(query, type) {
-    // Implement local storage history
-    const history = JSON.parse(localStorage.getItem('searchHistory') || []);
-    history.unshift({ query, type, timestamp: new Date().toISOString() });
-    localStorage.setItem('searchHistory', JSON.stringify(history.slice(0, 10)));
-    updateHistoryDisplay();
-}
-
-function updateHistoryDisplay() {
-    const history = JSON.parse(localStorage.getItem('searchHistory') || []);
-    const historyDiv = document.getElementById('recent-searches');
-    
-    historyDiv.innerHTML = history.map(item => `
-        <button class="list-group-item list-group-item-action small">
-            <span class="badge bg-secondary me-1">${item.type}</span>
-            ${item.query.substring(0, 20)}${item.query.length > 20 ? '...' : ''}
-        </button>
-    `).join('');
-}// In the saveToHistory function (line ~200 in original script)
-function saveToHistory(query, type) {
-    try {
-        // Initialize with empty array if no history exists
-        const historyStr = localStorage.getItem('searchHistory') || '[]';
-        const history = JSON.parse(historyStr);
-        
-        // Ensure we're working with an array
-        if (!Array.isArray(history)) {
-            throw new Error('Invalid history format');
+    // History management methods
+    loadSearchHistory() {
+        try {
+            const history = JSON.parse(localStorage.getItem('deepSearchHistory') || '[]');
+            this.updateHistoryDisplay(history);
+        } catch (error) {
+            console.error('Failed to load history:', error);
+            localStorage.setItem('deepSearchHistory', '[]');
         }
-        
-        history.unshift({ 
-            query, 
-            type, 
-            timestamp: new Date().toISOString() 
-        });
-        
-        localStorage.setItem('searchHistory', JSON.stringify(history.slice(0, 10)));
-        updateHistoryDisplay();
-    } catch (error) {
-        console.error('History save error:', error);
-        // Reset history if corrupted
-        localStorage.setItem('searchHistory', '[]');
     }
-}
 
-// In the updateHistoryDisplay function (line ~210)
-function updateHistoryDisplay() {
-    try {
-        const historyStr = localStorage.getItem('searchHistory') || '[]';
-        const history = JSON.parse(historyStr);
-        
+    saveToHistory(query, type) {
+        try {
+            const history = JSON.parse(localStorage.getItem('deepSearchHistory') || '[]');
+            history.unshift({ 
+                query, 
+                type, 
+                timestamp: new Date().toISOString() 
+            });
+            localStorage.setItem('deepSearchHistory', JSON.stringify(history.slice(0, 10)));
+            this.updateHistoryDisplay(history);
+        } catch (error) {
+            console.error('Failed to save history:', error);
+        }
+    }
+
+    clearHistory() {
+        localStorage.setItem('deepSearchHistory', '[]');
+        this.updateHistoryDisplay([]);
+    }
+
+    updateHistoryDisplay(history) {
         const historyDiv = document.getElementById('recent-searches');
         if (!historyDiv) return;
-        
-        historyDiv.innerHTML = history.map(item => `
-            <button class="list-group-item list-group-item-action small">
-                <span class="badge bg-secondary me-1">${item.type}</span>
-                ${item.query.substring(0, 20)}${item.query.length > 20 ? '...' : ''}
-            </button>
-        `).join('');
-    } catch (error) {
-        console.error('History display error:', error);
-        localStorage.setItem('searchHistory', '[]');
+
+        historyDiv.innerHTML = history.length > 0 
+            ? history.map(item => `
+                <button class="list-group-item list-group-item-action small">
+                    <span class="badge bg-secondary me-1">${item.type}</span>
+                    ${item.query.substring(0, 20)}${item.query.length > 20 ? '...' : ''}
+                </button>
+              `).join('')
+            : `<div class="text-center text-muted p-2">No recent searches</div>`;
     }
+
+    // UI Helper methods
+    showLoading() {
+        document.getElementById('results').innerHTML = `
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary"></div>
+                <p class="mt-2">Searching...</p>
+            </div>
+        `;
+    }
+
+    showAlert(message, type = 'info') {
+        document.getElementById('results').innerHTML = `
+            <div class="alert alert-${type}">
+                ${message}
+            </div>
+        `;
+    }
+
+    updateSearchOptions() {
+        const optionsDiv = document.getElementById('search-options');
+        let html = '';
+
+        switch(this.currentSearchType) {
+            case 'google':
+                html = this.getGoogleOptions();
+                break;
+            case 'ftp':
+                html = this.getFTPOptions();
+                break;
+            case 'github':
+                html = this.getGitHubOptions();
+                break;
+            case 'shodan':
+                html = this.getShodanOptions();
+                break;
+            default:
+                html = '';
+        }
+
+        optionsDiv.innerHTML = html;
+    }
+
+    getGoogleOptions() {
+        return `
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">File Types</label>
+                    <select class="form-select" id="file-type">
+                        <option value="pdf">PDF</option>
+                        <option value="doc,docx">Word</option>
+                        <option value="xls,xlsx">Excel</option>
+                        <option value="ppt,pptx">PowerPoint</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Domain (optional)</label>
+                    <input type="text" id="domain" class="form-control" placeholder="example.com">
+                </div>
+            </div>
+        `;
+    }
+
+    // Other options methods would follow similar patterns
 }
+
+// Initialize the application when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new DeepSearch();
+});
