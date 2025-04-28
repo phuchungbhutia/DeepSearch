@@ -1,134 +1,142 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const searchInput = document.getElementById('searchInput');
-    const searchButton = document.getElementById('searchButton');
-    const resultsList = document.getElementById('resultsList');
-    const noResultsMessage = document.getElementById('noResults');
-    const searchTypeLinks = document.querySelectorAll('aside .nav-link');
-    const optionsPanels = {
-        'google-drive': document.getElementById('google-drive-options'),
-        'ftp': document.getElementById('ftp-options'),
-        'github': document.getElementById('github-options'),
-        'shodan': document.getElementById('shodan-options')
-    };
-    let currentSearchType = 'google-drive';
-
-    // Function to update visibility of options panels
-    function updateOptionsVisibility(searchType) {
-        for (const key in optionsPanels) {
-            optionsPanels[key].style.display = key === searchType ? 'block' : 'none';
-        }
+class SearchController {
+    constructor() {
+        this.currentSearchType = 'google-drive';
+        this.history = JSON.parse(localStorage.getItem('searchHistory')) || [];
+        this.apiKey = 'YOUR_GOOGLE_API_KEY'; // Replace with your Google API key
+        this.cx = 'YOUR_SEARCH_ENGINE_ID'; // Replace with your Search Engine ID
+        this.proxyUrl = 'http://localhost:3000/api/search'; // Proxy server URL
+        this.initEventListeners();
+        this.renderHistory();
     }
 
-    // Event listener for sidebar navigation
-    searchTypeLinks.forEach(link => {
-        link.addEventListener('click', (event) => {
-            event.preventDefault();
-            searchTypeLinks.forEach(l => l.classList.remove('active'));
-            link.classList.add('active');
-            currentSearchType = link.dataset.searchType;
-            updateOptionsVisibility(currentSearchType);
-            searchInput.placeholder = `Enter your ${currentSearchType.replace('-', ' ')} search query...`;
+    initEventListeners() {
+        // Search type selection
+        document.querySelectorAll('.nav-link[data-search-type]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                document.querySelector('.nav-link.active').classList.remove('active');
+                link.classList.add('active');
+                this.currentSearchType = link.dataset.searchType;
+                this.updateSearchOptions();
+            });
         });
-    });
 
-    // Basic Google Drive search function (for demonstration - needs actual API integration)
-    async function performGoogleDriveSearch(query, fileType, safeSearch) {
-        // In a real application, you would use the Google Custom Search JSON API here.
-        // This is a placeholder to simulate results.
-        const fakeResults = [
-            { title: `Sample PDF on Google Drive for "${query}"`, link: 'https://example.com/drive/sample.pdf', source: 'Google Drive' },
-            { title: `Another Document related to "${query}"`, link: 'https://example.com/drive/document.docx', source: 'Google Drive' }
-        ].filter(result => fileType === '' || result.link.endsWith(fileType));
+        // Search form submission
+        document.getElementById('search-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.performSearch();
+        });
 
-        return new Promise(resolve => {
-            setTimeout(() => {
-                resolve(fakeResults);
-            }, 500); // Simulate network delay
+        // Theme toggle
+        document.getElementById('toggle-theme').addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
         });
     }
 
-    // Handle search button click
-    searchButton.addEventListener('click', async () => {
-        const query = searchInput.value.trim();
+    updateSearchOptions() {
+        const optionsDiv = document.getElementById('search-options');
+        optionsDiv.innerHTML = `
+            <label for="file-type" class="form-label">File Type</label>
+            <select class="form-select" id="file-type">
+                <option value="">All</option>
+                <option value="pdf">PDF</option>
+                <option value="doc">DOC</option>
+                <option value="xls">XLS</option>
+            </select>
+        `;
+    }
+
+    async performSearch() {
+        const query = document.getElementById('search-query').value.trim();
+        const fileType = document.getElementById('file-type').value;
         if (!query) {
-            alert('Please enter a search query.');
+            document.getElementById('results-list').innerHTML = '<p class="text-warning">Please enter a search query.</p>';
             return;
         }
 
-        resultsList.innerHTML = ''; // Clear previous results
-        noResultsMessage.style.display = 'none';
+        document.getElementById('loading').classList.remove('d-none');
+        document.getElementById('results-list').innerHTML = '';
 
-        switch (currentSearchType) {
-            case 'google-drive':
-                const fileTypeFilter = document.getElementById('fileTypeFilter').value;
-                const safeSearchToggle = document.getElementById('safeSearchToggle').checked;
-                const googleDriveResults = await performGoogleDriveSearch(query, fileTypeFilter, safeSearchToggle);
-                displayResults(googleDriveResults);
-                break;
-            case 'ftp':
-                alert('FTP search functionality will be implemented.');
-                break;
-            case 'github':
-                alert('GitHub secrets search functionality will be implemented.');
-                break;
-            case 'shodan':
-                alert('Shodan search functionality will be implemented.');
-                break;
-            default:
-                alert('Invalid search type.');
+        let searchQuery = `site:drive.google.com ${fileType ? `filetype:${fileType}` : ''} ${encodeURIComponent(query)}`;
+
+        try {
+            const results = await this.fetchGoogleSearchResults(searchQuery);
+            this.displayResults(results);
+            this.saveSearch(query, this.currentSearchType);
+        } catch (error) {
+            document.getElementById('results-list').innerHTML = `<p class="text-danger">Error: ${error.message}. Please try again or check your API setup.</p>`;
+        } finally {
+            document.getElementById('loading').classList.add('d-none');
         }
-    });
+    }
 
-    // Function to display search results
-    function displayResults(results) {
-        if (results && results.length > 0) {
-            results.forEach(result => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <div class="mb-2">
-                        <strong><a href="${result.link}" target="_blank" rel="noopener noreferrer">${result.title}</a></strong>
-                        <p class="text-muted small">Source: ${result.source}</p>
-                    </div>
-                `;
-                resultsList.appendChild(listItem);
+    async fetchGoogleSearchResults(query) {
+        const url = `${this.proxyUrl}?q=${encodeURIComponent(query)}&key=${this.apiKey}&cx=${this.cx}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error('Failed to fetch search results');
+        }
+        const data = await response.json();
+        if (!data.items || data.items.length === 0) {
+            return [];
+        }
+        return data.items.map(item => ({
+            title: item.title,
+            link: item.link,
+            snippet: item.snippet,
+        }));
+    }
+
+    displayResults(results) {
+        const resultsList = document.getElementById('results-list');
+        if (results.length === 0) {
+            resultsList.innerHTML = '<p>No results found. Try broadening your search terms or check the search type.</p>';
+            return;
+        }
+
+        results.forEach(result => {
+            const div = document.createElement('div');
+            div.className = 'result-item';
+            div.innerHTML = `
+                <h5><a href="${result.link}" target="_blank">${result.title}</a></h5>
+                <p>${result.snippet}</p>
+                <small>Source: ${this.currentSearchType}</small>
+            `;
+            resultsList.appendChild(div);
+        });
+    }
+
+    saveSearch(query, type) {
+        this.history.unshift({ query, type, timestamp: new Date().toISOString() });
+        this.history = this.history.slice(0, 10); // Keep last 10 searches
+        localStorage.setItem('searchHistory', JSON.stringify(this.history));
+        this.renderHistory();
+    }
+
+    renderHistory() {
+        const historyList = document.getElementById('recent-searches');
+        historyList.innerHTML = '';
+        this.history.forEach(search => {
+            const li = document.createElement('li');
+            li.className = 'nav-item';
+            li.innerHTML = `
+                <a class="nav-link" href="#" data-query="${search.query}" data-type="${search.type}">
+                    <i class="bi bi-clock-history"></i> ${search.query}
+                </a>`;
+            historyList.appendChild(li);
+            li.querySelector('a').addEventListener('click', (e) => {
+                e.preventDefault();
+                document.getElementById('search-query').value = search.query;
+                document.querySelector('.nav-link.active').classList.remove('active');
+                document.querySelector(`[data-search-type="${search.type}"]`).classList.add('active');
+                this.currentSearchType = search.type;
+                this.updateSearchOptions();
+                this.performSearch();
             });
-        } else {
-            noResultsMessage.style.display = 'block';
-        }
+        });
     }
+}
 
-    // Basic dark/light mode toggle (can be expanded in settings)
-    const darkModeMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    function toggleDarkMode(isDark) {
-        document.body.classList.toggle('dark-mode', isDark);
-    }
-    toggleDarkMode(darkModeMediaQuery.matches);
-    darkModeMediaQuery.addEventListener('change', (event) => toggleDarkMode(event.matches));
-
-    // Placeholder for recent searches (will use local storage later)
-    const recentSearchesPanel = document.getElementById('recentSearches');
-    const recentSearchesList = document.getElementById('recentSearchesList');
-    const clearHistoryButton = document.getElementById('clearHistoryButton');
-
-    // Initially hide recent searches
-    recentSearchesPanel.style.display = 'none';
-
-    // Placeholder for settings save
-    const saveSettingsButton = document.getElementById('saveSettings');
-    const resultsPerPageSelect = document.getElementById('resultsPerPage');
-
-    saveSettingsButton.addEventListener('click', () => {
-        const resultsPerPage = resultsPerPageSelect.value;
-        console.log('Results per page saved:', resultsPerPage);
-        // In a real application, you would save this to local storage or handle it differently.
-        bootstrap.Modal.getInstance(document.getElementById('settingsModal')).hide();
-    });
-
-    // Placeholder for clear history
-    clearHistoryButton.addEventListener('click', () => {
-        recentSearchesList.innerHTML = ''; // Clear displayed history
-        console.log('Search history cleared.');
-        // In a real application, you would clear local storage here.
-        recentSearchesPanel.style.display = 'none'; // Hide if empty
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    new SearchController();
 });
