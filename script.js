@@ -255,4 +255,50 @@ function updateHistoryDisplay() {
             ${item.query.substring(0, 20)}${item.query.length > 20 ? '...' : ''}
         </button>
     `).join('');
+}// In the saveToHistory function (line ~200 in original script)
+function saveToHistory(query, type) {
+    try {
+        // Initialize with empty array if no history exists
+        const historyStr = localStorage.getItem('searchHistory') || '[]';
+        const history = JSON.parse(historyStr);
+        
+        // Ensure we're working with an array
+        if (!Array.isArray(history)) {
+            throw new Error('Invalid history format');
+        }
+        
+        history.unshift({ 
+            query, 
+            type, 
+            timestamp: new Date().toISOString() 
+        });
+        
+        localStorage.setItem('searchHistory', JSON.stringify(history.slice(0, 10)));
+        updateHistoryDisplay();
+    } catch (error) {
+        console.error('History save error:', error);
+        // Reset history if corrupted
+        localStorage.setItem('searchHistory', '[]');
+    }
+}
+
+// In the updateHistoryDisplay function (line ~210)
+function updateHistoryDisplay() {
+    try {
+        const historyStr = localStorage.getItem('searchHistory') || '[]';
+        const history = JSON.parse(historyStr);
+        
+        const historyDiv = document.getElementById('recent-searches');
+        if (!historyDiv) return;
+        
+        historyDiv.innerHTML = history.map(item => `
+            <button class="list-group-item list-group-item-action small">
+                <span class="badge bg-secondary me-1">${item.type}</span>
+                ${item.query.substring(0, 20)}${item.query.length > 20 ? '...' : ''}
+            </button>
+        `).join('');
+    } catch (error) {
+        console.error('History display error:', error);
+        localStorage.setItem('searchHistory', '[]');
+    }
 }
