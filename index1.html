@@ -164,30 +164,3 @@ Get direct download links for almost anything.
 </div>
 </body>
 </html>
-<script>
-    function runSearch() {
-      const type = document.getElementById("type").value;
-      const query = document.getElementById("query").value.trim();
-
-      if (!query) {
-        alert("Please enter a keyword.");
-        return;
-      }
-
-      let searchUrl = "";
-
-      switch (type) {
-        case "google":
-          searchUrl = `https://www.google.com/search?q=site:drive.google.com filetype:pdf "${encodeURIComponent(query)}"`;
-          break;
-        case "ftp":
-          searchUrl = `https://www.google.com/search?q=intitle:"index of" "${encodeURIComponent(query)}" -html -htm -php -asp`;
-          break;
-        case "github":
-          searchUrl = `https://github.com/search?q=${encodeURIComponent(query)}+in:file+language:env`;
-          break;
-      }
-
-      window.open(searchUrl, "_blank");
-    }
-</script>
