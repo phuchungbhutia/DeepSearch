@@ -112,24 +112,24 @@
     <div class="preset-group">
       <h4>🧠 Google Dork Presets</h4>
       <ul>
-        <li onclick="applyPreset('site:docs.google.com \\\"confidential\\\"', 'google')">Google Docs (Confidential)</li>
+        <li onclick="applyPreset('site:docs.google.com confidential', 'google')">Google Docs (Confidential)</li>
         <li onclick="applyPreset('site:drive.google.com filetype:csv', 'google')">Google Drive CSV</li>
-        <li onclick="applyPreset('intitle:\\\"admin login\\\"', 'google')">Exposed Admin Panels</li>
-        <li onclick="applyPreset('inurl:\\\"viewerframe?mode=\\\"', 'google')">Public Camera Feeds</li>
+        <li onclick="applyPreset('intitle:admin login', 'google')">Exposed Admin Panels</li>
+        <li onclick="applyPreset('inurl:viewerframe?mode=', 'google')">Public Camera Feeds</li>
         <li onclick="applyPreset('filetype:log password', 'google')">Vulnerable Log Files</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" backup', 'google')">Backup Files</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" *.torrent', 'google')">Torrent Files</li>
+        <li onclick="applyPreset('intitle:index of backup', 'google')">Backup Files</li>
+        <li onclick="applyPreset('intitle:index of *.torrent', 'google')">Torrent Files</li>
       </ul>
     </div>
 
     <div class="preset-group">
       <h4>🌐 FTP / Directory Index Searches</h4>
       <ul>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" (mp4)', 'ftp')">Movies</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" (pdf)', 'ftp')">Books</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" (iso)', 'ftp')">ISO/DMG files</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" (mp3)', 'ftp')">Music</li>
-        <li onclick="applyPreset('intitle:\\\"index of\\\" (exe)', 'ftp')">Software</li>
+        <li onclick="applyPreset('intitle:index of (mp4)', 'ftp')">Movies</li>
+        <li onclick="applyPreset('intitle:index of (pdf)', 'ftp')">Books</li>
+        <li onclick="applyPreset('intitle:index of (iso)', 'ftp')">ISO/DMG files</li>
+        <li onclick="applyPreset('intitle:index of (mp3)', 'ftp')">Music</li>
+        <li onclick="applyPreset('intitle:index of (exe)', 'ftp')">Software</li>
       </ul>
     </div>
 
@@ -141,7 +141,7 @@
         <li onclick="applyPreset('port:102 OR port:502', 'shodan')">Industrial PLCs</li>
         <li onclick="applyPreset('port:9100', 'shodan')">Printers</li>
         <li onclick="applyPreset('default password', 'shodan')">Default Credentials</li>
-        <li onclick="applyPreset('http.title:\\\"Dashboard [Jenkins]\\\"', 'shodan')">Jenkins Servers</li>
+        <li onclick="applyPreset('http.title:Dashboard [Jenkins]', 'shodan')">Jenkins Servers</li>
         <li onclick="applyPreset('port:5000 Synology', 'shodan')">NAS Devices</li>
       </ul>
     </div>
