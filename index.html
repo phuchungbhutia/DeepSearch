@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DeepSearch – Google | GitHub | FTP</title>
+  <title>DeepSearch – Google | GitHub | FTP | Shodan</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Search Google Drive, GitHub secrets, and open FTP directories using Google Dorks." />
+  <meta name="description" content="Search Google Drive, GitHub secrets, open directories, and Shodan IoT using dorks." />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
   <style>
     body {
@@ -19,7 +19,7 @@
     }
 
     .search-box {
-      max-width: 700px;
+      max-width: 750px;
       margin: 30px auto;
       display: flex;
       gap: 10px;
@@ -49,13 +49,14 @@
 <body>
 
   <h1>DeepSearch 🔍</h1>
-  <p>Search Google Drive, GitHub secrets, and open FTP directories</p>
+  <p>Search Google Drive, GitHub secrets, open FTP directories, and Shodan IoT</p>
 
   <div class="search-box">
     <select id="source" onchange="toggleFiletype()">
       <option value="google">Google Drive</option>
       <option value="ftp">FTP / Index Directories</option>
       <option value="github">GitHub Secrets</option>
+      <option value="shodan">Shodan IoT</option>
     </select>
 
     <select id="filetype">
@@ -71,12 +72,14 @@
     <button onclick="runSearch()">Search</button>
   </div>
 
-  <p class="note">Results open in a new tab using Google or GitHub search.</p>
+  <p class="note">Results open in a new tab using Google, GitHub, or Shodan search.</p>
 
   <script>
     function toggleFiletype() {
       const source = document.getElementById("source").value;
       const filetypeSelect = document.getElementById("filetype");
+
+      // Show filetype only for Google Drive
       filetypeSelect.style.display = (source === "google") ? "inline-block" : "none";
     }
 
@@ -94,7 +97,7 @@
 
       switch (source) {
         case "google":
-        searchUrl = `https://www.google.com/search?q=site:drive.google.com ${filetype ? `filetype:${filetype}` : ""} "${encodeURIComponent(query)}"`;
+          searchUrl = `https://www.google.com/search?q=site:drive.google.com ${filetype ? `filetype:${filetype}` : ""} "${encodeURIComponent(query)}"`;
           break;
         case "ftp":
           searchUrl = `https://www.google.com/search?q=intitle:"index of" "${encodeURIComponent(query)}" -html -htm -php -asp`;
@@ -102,12 +105,15 @@
         case "github":
           searchUrl = `https://github.com/search?q=${encodeURIComponent(query)}+in:file+language:env`;
           break;
+        case "shodan":
+          searchUrl = `https://www.shodan.io/search?query=${encodeURIComponent(query)}`;
+          break;
       }
 
       window.open(searchUrl, "_blank");
     }
 
-    // Initialize on load
+    // On load: initialize filetype visibility and Enter key support
     toggleFiletype();
 
     document.getElementById("query").addEventListener("keydown", function(e) {
