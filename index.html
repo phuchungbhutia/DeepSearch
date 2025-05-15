@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DeepSearch – Google | GitHub | FTP | Shodan</title>
+  <title>DeepSearch – Smart Presets</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="description" content="Search Google Drive, GitHub secrets, open directories, and Shodan IoT using dorks." />
+  <meta name="description" content="DeepSearch: Google Dorks, GitHub secrets, FTP, Shodan IoT search engine." />
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
   <style>
     body {
@@ -14,13 +14,9 @@
       text-align: center;
     }
 
-    h1 {
-      margin-bottom: 10px;
-    }
-
-    .search-box {
-      max-width: 750px;
-      margin: 30px auto;
+    .search-box, .presets-box {
+      max-width: 900px;
+      margin: 20px auto;
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
@@ -39,57 +35,137 @@
       cursor: pointer;
     }
 
+    .toggle-btn {
+      margin-top: 20px;
+      background-color: #34a853;
+      color: white;
+    }
+
     .note {
       font-size: 0.9em;
       color: #666;
       margin-top: 15px;
+    }
+
+    .preset-group {
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .preset-group h4 {
+      margin-bottom: 10px;
+    }
+
+    .preset-group ul {
+      padding-left: 20px;
+    }
+
+    .preset-group li {
+      cursor: pointer;
+      color: #0073e6;
+      margin-bottom: 5px;
+    }
+
+    .preset-group li:hover {
+      text-decoration: underline;
+    }
+
+    #presets-section {
+      display: none;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 20px;
+      border-radius: 8px;
     }
   </style>
 </head>
 <body>
 
   <h1>DeepSearch 🔍</h1>
-  <p>Search Google Drive, GitHub secrets, open FTP directories, and Shodan IoT</p>
+  <p>Search Google Drive, GitHub, FTP directories, and Shodan with powerful dorks</p>
 
   <div class="search-box">
-    <select id="source" onchange="toggleFiletype()">
+    <select id="source">
       <option value="google">Google Drive</option>
       <option value="ftp">FTP / Index Directories</option>
       <option value="github">GitHub Secrets</option>
       <option value="shodan">Shodan IoT</option>
     </select>
 
-    <select id="filetype">
-      <option value="">Any Type</option>
-      <option value="pdf">PDF</option>
-      <option value="docx">DOCX</option>
-      <option value="xlsx">XLSX</option>
-      <option value="pptx">PPTX</option>
-      <option value="txt">TXT</option>
-    </select>
-
-    <input type="text" id="query" placeholder="Enter your keyword..." />
+    <input type="text" id="query" placeholder="Enter your keyword or click a preset..." />
     <button onclick="runSearch()">Search</button>
   </div>
 
-  <p class="note">Results open in a new tab using Google, GitHub, or Shodan search.</p>
+  <button class="toggle-btn" onclick="togglePresets()">📂 Show Presets</button>
+
+  <div id="presets-section">
+    <div class="preset-group">
+      <h4>🔐 GitHub Secrets</h4>
+      <ul>
+        <li onclick="applyPreset('AWS_SECRET_ACCESS_KEY language:env', 'github')">AWS keys</li>
+        <li onclick="applyPreset('\"api_key\" language:json', 'github')">API keys</li>
+        <li onclick="applyPreset('DB_PASSWORD language:env', 'github')">DB passwords</li>
+        <li onclick="applyPreset('token language:yaml', 'github')">Private tokens</li>
+      </ul>
+    </div>
+
+    <div class="preset-group">
+      <h4>🧠 Google Dork Presets</h4>
+      <ul>
+        <li onclick="applyPreset('site:docs.google.com \\\"confidential\\\"', 'google')">Google Docs (Confidential)</li>
+        <li onclick="applyPreset('site:drive.google.com filetype:csv', 'google')">Google Drive CSV</li>
+        <li onclick="applyPreset('intitle:\\\"admin login\\\"', 'google')">Exposed Admin Panels</li>
+        <li onclick="applyPreset('inurl:\\\"viewerframe?mode=\\\"', 'google')">Public Camera Feeds</li>
+        <li onclick="applyPreset('filetype:log password', 'google')">Vulnerable Log Files</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" backup', 'google')">Backup Files</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" *.torrent', 'google')">Torrent Files</li>
+      </ul>
+    </div>
+
+    <div class="preset-group">
+      <h4>🌐 FTP / Directory Index Searches</h4>
+      <ul>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" (mp4)', 'ftp')">Movies</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" (pdf)', 'ftp')">Books</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" (iso)', 'ftp')">ISO/DMG files</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" (mp3)', 'ftp')">Music</li>
+        <li onclick="applyPreset('intitle:\\\"index of\\\" (exe)', 'ftp')">Software</li>
+      </ul>
+    </div>
+
+    <div class="preset-group">
+      <h4>📡 Shodan Presets (IoT + Recon)</h4>
+      <ul>
+        <li onclick="applyPreset('webcam country:US', 'shodan')">Webcams (US)</li>
+        <li onclick="applyPreset('port:27017 product:MongoDB', 'shodan')">Open MongoDB</li>
+        <li onclick="applyPreset('port:102 OR port:502', 'shodan')">Industrial PLCs</li>
+        <li onclick="applyPreset('port:9100', 'shodan')">Printers</li>
+        <li onclick="applyPreset('default password', 'shodan')">Default Credentials</li>
+        <li onclick="applyPreset('http.title:\\\"Dashboard [Jenkins]\\\"', 'shodan')">Jenkins Servers</li>
+        <li onclick="applyPreset('port:5000 Synology', 'shodan')">NAS Devices</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="note">Click any preset or enter your own search. Powered by Google, GitHub, and Shodan.</p>
 
   <script>
-    function toggleFiletype() {
-      const source = document.getElementById("source").value;
-      const filetypeSelect = document.getElementById("filetype");
+    function applyPreset(query, source) {
+      document.getElementById("query").value = query;
+      document.getElementById("source").value = source;
+    }
 
-      // Show filetype only for Google Drive
-      filetypeSelect.style.display = (source === "google") ? "inline-block" : "none";
+    function togglePresets() {
+      const section = document.getElementById("presets-section");
+      section.style.display = (section.style.display === "none") ? "block" : "none";
     }
 
     function runSearch() {
       const source = document.getElementById("source").value;
       const query = document.getElementById("query").value.trim();
-      const filetype = document.getElementById("filetype").value;
 
       if (!query) {
-        alert("Please enter a keyword.");
+        alert("Please enter a keyword or choose a preset.");
         return;
       }
 
@@ -97,10 +173,10 @@
 
       switch (source) {
         case "google":
-          searchUrl = `https://www.google.com/search?q=site:drive.google.com ${filetype ? `filetype:${filetype}` : ""} "${encodeURIComponent(query)}"`;
+          searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}`;
           break;
         case "ftp":
-          searchUrl = `https://www.google.com/search?q=intitle:"index of" "${encodeURIComponent(query)}" -html -htm -php -asp`;
+          searchUrl = `https://www.google.com/search?q=intitle:"index of" ${encodeURIComponent(query)} -html -htm -php -asp`;
           break;
         case "github":
           searchUrl = `https://github.com/search?q=${encodeURIComponent(query)}+in:file+language:env`;
@@ -112,9 +188,6 @@
 
       window.open(searchUrl, "_blank");
     }
-
-    // On load: initialize filetype visibility and Enter key support
-    toggleFiletype();
 
     document.getElementById("query").addEventListener("keydown", function(e) {
       if (e.key === "Enter") runSearch();
