@@ -94,7 +94,7 @@
 
       switch (source) {
         case "google":
-          searchUrl = `https://www.google.com/search?q=site:drive.google.com filetype:${filetype} "${encodeURIComponent(query)}"`;
+        searchUrl = `https://www.google.com/search?q=site:drive.google.com ${filetype ? `filetype:${filetype}` : ""} "${encodeURIComponent(query)}"`;
           break;
         case "ftp":
           searchUrl = `https://www.google.com/search?q=intitle:"index of" "${encodeURIComponent(query)}" -html -htm -php -asp`;
